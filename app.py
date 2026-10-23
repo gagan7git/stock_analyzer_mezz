@@ -10,6 +10,22 @@ st.set_page_config(page_title="Stock Analyzer", page_icon="📈", layout="wide")
 
 GREEN, RED, BLUE, ORANGE, GREY = "#16a34a", "#dc2626", "#2563eb", "#f59e0b", "#64748b"
 
+THEMES = {
+    "Black": dict(bg="#000000", panel="#111111", text="#fafafa", muted="#a3a3a3", template="plotly_dark"),
+    "White": dict(bg="#ffffff", panel="#f0f2f6", text="#31333f", muted="#6b7280", template="plotly_white"),
+}
+
+# ------------------------------------------------------------------- theme
+_, theme_col = st.columns([5, 1])
+THEME = THEMES[theme_col.radio("Theme", list(THEMES), horizontal=True)]
+st.markdown(f"""<style>
+.stApp, [data-testid="stHeader"] {{ background-color: {THEME['bg']}; color: {THEME['text']}; }}
+[data-testid="stSidebar"] {{ background-color: {THEME['panel']}; }}
+.stApp h1, .stApp h2, .stApp h3, .stApp p, .stApp li, .stApp label,
+[data-testid="stMetricValue"], [data-testid="stMetricLabel"] {{ color: {THEME['text']} !important; }}
+[data-testid="stCaptionContainer"] {{ color: {THEME['muted']} !important; }}
+</style>""", unsafe_allow_html=True)
+
 
 @st.cache_data(ttl=300, show_spinner=False)
 def load(symbol, period, interval):
@@ -33,7 +49,8 @@ def fmt_vol(n):
 
 def style(fig, intraday, height, title):
     fig.update_layout(height=height, title=title, margin=dict(l=10, r=10, t=40, b=10),
-                      xaxis_rangeslider_visible=False, showlegend=False)
+                      xaxis_rangeslider_visible=False, showlegend=False, template=THEME["template"],
+                      paper_bgcolor=THEME["bg"], plot_bgcolor=THEME["bg"])
     if intraday:
         fig.update_xaxes(type="category", nticks=8)
     else:
@@ -126,7 +143,7 @@ with tab_year:
     if not intraday:
         fig.add_vrect(x0=window.index[0], x1=window.index[-1], fillcolor=BLUE, opacity=0.07, line_width=0)
     st.plotly_chart(style(fig, False, 560, "Daily price, past year (shaded = selected window)"),
-                    use_container_width=True)
+                    use_container_width=True, theme=None)
 
 x = window.index.strftime("%b %d %H:%M") if intraday else window.index
 with tab_window:
@@ -139,7 +156,7 @@ with tab_window:
         if lvl["price"] <= hi:
             add_level(fig, lvl, RED, "R")
     st.plotly_chart(style(fig, intraday, 480, f"Price, {timeframe} ({tf['interval']} bars)"),
-                    use_container_width=True)
+                    use_container_width=True, theme=None)
 
 # -------------------------------------------------------------- indicators
 left, right = st.columns(2)
@@ -148,7 +165,7 @@ with left:
     fig.add_hline(y=70, line_dash="dash", line_color=RED, annotation_text="Overbought 70")
     fig.add_hline(y=30, line_dash="dash", line_color=GREEN, annotation_text="Oversold 30")
     fig.update_yaxes(range=[0, 100])
-    st.plotly_chart(style(fig, intraday, 320, f"RSI (14): now {rec['rsi']:.1f}"), use_container_width=True)
+    st.plotly_chart(style(fig, intraday, 320, f"RSI (14): now {rec['rsi']:.1f}"), use_container_width=True, theme=None)
 with right:
     fig = go.Figure([
         go.Bar(x=x, y=window["hist"], marker_color=[GREEN if v >= 0 else RED for v in window["hist"]], name="Histogram"),
@@ -156,7 +173,7 @@ with right:
         go.Scatter(x=x, y=window["signal"], line_color=ORANGE, name="Signal"),
     ])
     style(fig, intraday, 320, "MACD (12, 26, 9): blue = MACD, orange = signal")
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, theme=None)
 
 # ------------------------------------------------------------------ volume
 st.subheader("Volume")
@@ -168,7 +185,7 @@ fig = go.Figure(go.Bar(x=x, y=window["Volume"], marker_color=GREY))
 avg_line = vol["avg_per_bar"] if intraday else vol["avg_50d"]
 fig.add_hline(y=avg_line, line_dash="dash", line_color=ORANGE,
               annotation_text="Avg per bar" if intraday else "50-day avg")
-st.plotly_chart(style(fig, intraday, 280, f"Volume, {timeframe}"), use_container_width=True)
+st.plotly_chart(style(fig, intraday, 280, f"Volume, {timeframe}"), use_container_width=True, theme=None)
 if intraday:
     st.caption("Today's volume is partial while the market is open.")
 
