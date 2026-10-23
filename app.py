@@ -1,4 +1,4 @@
-"""Stock Analyzer: run with `streamlit run app.py`."""
+"""Gagan: run with `streamlit run app.py`."""
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
@@ -6,7 +6,7 @@ import yfinance as yf
 
 import analysis as an
 
-st.set_page_config(page_title="Stock Analyzer", page_icon="📈", layout="wide")
+st.set_page_config(page_title="Gagan", page_icon="📈", layout="wide")
 
 GREEN, RED, BLUE, ORANGE, GREY = "#16a34a", "#dc2626", "#2563eb", "#f59e0b", "#64748b"
 
@@ -16,7 +16,17 @@ THEMES = {
 }
 
 # ------------------------------------------------------------------- theme
-_, theme_col = st.columns([5, 1])
+brand_col, theme_col = st.columns([5, 1])
+brand_col.markdown("""<div style="display:flex;align-items:center;gap:10px">
+<svg width="44" height="44" viewBox="0 0 48 48" fill="none" stroke="url(#gagan-sky)" stroke-width="5"
+     stroke-linecap="round" stroke-linejoin="round">
+  <defs><linearGradient id="gagan-sky" x1="0" y1="1" x2="1" y2="0">
+    <stop offset="0" stop-color="#2563eb"/><stop offset="1" stop-color="#16a34a"/>
+  </linearGradient></defs>
+  <path d="M4 40 L18 18 L26 28 L40 8"/><path d="M30 8 H40 V18"/>
+</svg>
+<span style="font-size:2.2rem;font-weight:800;letter-spacing:0.5px">Gagan</span>
+</div>""", unsafe_allow_html=True)
 THEME = THEMES[theme_col.radio("Theme", list(THEMES), horizontal=True)]
 st.markdown(f"""<style>
 .stApp, [data-testid="stHeader"] {{ background-color: {THEME['bg']}; color: {THEME['text']}; }}
